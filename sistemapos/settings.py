@@ -77,11 +77,14 @@ WSGI_APPLICATION = 'sistemapos.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'pos_db',        # El nombre exacto de la base de datos que creaste en phpMyAdmin
-        'USER': 'root',          # El usuario por defecto de XAMPP
-        'PASSWORD': '',          # En XAMPP la contraseña viene vacía por defecto
-        'HOST': '127.0.0.1',     # O 'localhost'
-        'PORT': '3306',          # El puerto por defecto de MySQL en XAMPP
+        'NAME': 'test',
+        'USER': '3KpkYMYZrYCpt4i.root',
+        'PASSWORD': 'tktbLXSTeITlX2HD',
+        'HOST': 'gateway01.us-east-1.prod.aws.tidbcloud.com',
+        'PORT': '4000',
+        'OPTIONS': {
+            'ssl': {'ssl_mode': 'VERIFY_IDENTITY'}
+        }
     }
 }
 
