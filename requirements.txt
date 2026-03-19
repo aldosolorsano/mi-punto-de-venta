@@ -1,6 +1,5 @@
 asgiref==3.11.1
 Django==6.0.3
-mysqlclient==2.2.8
 PyMySQL==1.1.2
 pytz==2025.2
 setuptools==82.0.0
