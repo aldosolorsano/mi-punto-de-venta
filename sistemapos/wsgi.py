@@ -1,30 +1,10 @@
-"""
-WSGI config for sistemapos project.
-
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
-"""
-
 import os
+import pymysql  # <--- Agregamos esto
+pymysql.install_as_MySQLdb() # <--- Y esto
 
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sistemapos.settings')
 
 application = get_wsgi_application()
-
-{
-    "builds": [{
-        "src": "sistemapos/wsgi.py",
-        "use": "@vercel/python",
-        "config": { "maxLambdaSize": "15mb" }
-    }],
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "sistemapos/wsgi.py"
-        }
-    ]
-}
+app = application
