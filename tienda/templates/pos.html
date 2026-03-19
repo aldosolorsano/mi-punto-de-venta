@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Punto de Venta - Abarrotes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div style="display:none;">
+    {% csrf_token %}
+</div>
+
+<nav class="navbar navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">🛒 Mi Tienda de Abarrotes - Punto de Venta</span>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Ticket de Cobro</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cant.</th>
+                                <th>Precio</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-ticket">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Aún no hay productos en la venta</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <h4>Total:</h4>
+                        <h2 class="text-success" id="total-venta">$0.00</h2>
+                    </div>
+                    <button class="btn btn-success w-100 mt-3 btn-lg" id="btn-cobrar">💰 COBRAR</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Buscar por Código de Barras o Nombre:</label>
+                        <input type="text" id="input-buscador" class="form-control form-control-lg" placeholder="Escanea el código o escribe aquí y presiona Enter..." autofocus>
+                    </div>
+
+                    <h5>Productos Disponibles</h5>
+                    <div class="row mt-3">
+                        {% for producto in productos %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">{{ producto.nombre }}</h6>
+                                    <p class="text-primary fw-bold">${{ producto.precio_venta }}</p>
+                                    <p class="text-muted small">Stock: {{ producto.stock }}</p>
+                                    <button class="btn btn-outline-primary btn-sm btn-agregar" 
+                                            data-id="{{ producto.id }}" 
+                                            data-nombre="{{ producto.nombre }}" 
+                                            data-precio="{{ producto.precio_venta }}"
+                                            data-codigo="{{ producto.codigo_barras }}">
+                                        Agregar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="alert alert-warning">No hay productos con stock disponible. ¡Ve al administrador a ingresar mercancía!</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let carrito = [];
+
+    // 1. LÓGICA PARA AGREGAR PRODUCTOS AL TICKET
+    document.querySelectorAll('.btn-agregar').forEach(boton => {
+        boton.addEventListener('click', function() {
+            let id = this.getAttribute('data-id');
+            let nombre = this.getAttribute('data-nombre');
+            let precio = parseFloat(this.getAttribute('data-precio'));
+
+            let productoExistente = carrito.find(item => item.id === id);
+
+            if (productoExistente) {
+                productoExistente.cantidad += 1;
+            } else {
+                carrito.push({ id: id, nombre: nombre, precio: precio, cantidad: 1 });
+            }
+            
+            actualizarTicket();
+        });
+    });
+
+    // 2. LÓGICA PARA DIBUJAR LA TABLA Y EL TOTAL
+    function actualizarTicket() {
+        let tbody = document.getElementById('lista-ticket');
+        let totalElement = document.getElementById('total-venta');
+        tbody.innerHTML = ''; 
+        let total = 0;
+
+        if (carrito.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Aún no hay productos en la venta</td></tr>';
+            totalElement.innerText = '$0.00';
+            return;
+        }
+
+        carrito.forEach((item, index) => {
+            let subtotal = item.precio * item.cantidad;
+            total += subtotal;
+
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.nombre}</td>
+                <td>
+                    <button class="btn btn-sm btn-light border" onclick="cambiarCantidad(${index}, -1)">-</button>
+                    <span class="mx-2">${item.cantidad}</span>
+                    <button class="btn btn-sm btn-light border" onclick="cambiarCantidad(${index}, 1)">+</button>
+                </td>
+                <td>$${item.precio.toFixed(2)}</td>
+                <td>$${subtotal.toFixed(2)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        totalElement.innerText = '$' + total.toFixed(2);
+    }
+
+    // 3. LÓGICA PARA BOTONES DE + Y - EN EL TICKET
+    function cambiarCantidad(index, cambio) {
+        carrito[index].cantidad += cambio;
+        if (carrito[index].cantidad <= 0) {
+            carrito.splice(index, 1); 
+        }
+        actualizarTicket();
+    }
+
+    // 4. LÓGICA PARA EL BOTÓN DE COBRAR (CONEXIÓN CON DJANGO)
+    document.getElementById('btn-cobrar').addEventListener('click', function() {
+        if (carrito.length === 0) {
+            alert('Agrega al menos un producto para poder cobrar.');
+            return;
+        }
+
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch('/procesar-venta/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ carrito: carrito })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('¡Venta registrada con éxito! 💰');
+                carrito = [];
+                location.reload(); 
+            } else {
+                alert('Hubo un error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión con el servidor.');
+        });
+    });
+
+    // 5. NUEVO: LÓGICA DEL BUSCADOR / LECTOR DE BARRAS
+    document.getElementById('input-buscador').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Evitamos que la página se recargue por accidente
+            let textoBusqueda = this.value.trim().toLowerCase();
+            
+            if (textoBusqueda === '') return;
+
+            let productoEncontrado = false;
+            
+            // Buscamos entre todos los botones de los productos que están en pantalla
+            document.querySelectorAll('.btn-agregar').forEach(boton => {
+                let codigo = boton.getAttribute('data-codigo').toLowerCase();
+                let nombre = boton.getAttribute('data-nombre').toLowerCase();
+
+                // Si lo que escribiste es exactamente igual al código de barras, o es parte del nombre
+                if (codigo === textoBusqueda || nombre.includes(textoBusqueda)) {
+                    if (!productoEncontrado) { 
+                        boton.click(); // Mágicamente damos clic en el botón de agregar
+                        productoEncontrado = true;
+                    }
+                }
+            });
+
+            if (!productoEncontrado) {
+                alert('Producto no encontrado o no tiene stock.');
+            }
+            
+            this.value = ''; // Limpiamos la barra para escanear el siguiente
+        }
+    });
+</script>
+
+</body>
+</html>
