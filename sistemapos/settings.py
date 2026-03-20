@@ -76,14 +76,16 @@ WSGI_APPLICATION = 'sistemapos.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # Verificamos si la variable ENTORNO dice 'PRODUCCION' (esto solo pasará en Vercel)
+import os
+
+# Si Vercel tiene la etiqueta ENTORNO = PRODUCCION, se conecta a la nube
 if os.environ.get('ENTORNO') == 'PRODUCCION':
-    # --- CONEXIÓN A LA NUBE (TiDB para Vercel) ---
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'test',
             'USER': '3KpkYMYZrYCpt4i.root',
-            'PASSWORD': 'AQUI_PON_TU_CONTRASEÑA_REAL_DE_TIDB',
+            'PASSWORD': 'AQUI_PON_TU_CONTRASEÑA_DE_TIDB', # <-- OJO: ponla entre las comillas, sin espacios al inicio o final
             'HOST': 'gateway01.us-east-1.prod.aws.tidbcloud.com',
             'PORT': '4000',
             'OPTIONS': {
@@ -92,13 +94,13 @@ if os.environ.get('ENTORNO') == 'PRODUCCION':
         }
     }
 else:
-    # --- CONEXIÓN LOCAL (XAMPP para tu computadora) ---
+    # Si estás en tu compu, usa XAMPP
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'AQUI_NOMBRE_DE_TU_BASE_LOCAL', # La que usabas en XAMPP
-            'USER': 'root', # Usualmente es root en XAMPP
-            'PASSWORD': '', # Usualmente está vacía en XAMPP
+            'NAME': 'AQUI_PON_TU_BASE_LOCAL', # La base que usas en XAMPP
+            'USER': 'root',
+            'PASSWORD': '',
             'HOST': '127.0.0.1',
             'PORT': '3306',
         }
