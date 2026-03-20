@@ -85,7 +85,7 @@ if os.environ.get('ENTORNO') == 'PRODUCCION':
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'test',
             'USER': '3KpkYMYZrYCpt4i.root',
-            'PASSWORD': 'AQUI_PON_TU_CONTRASEÑA_DE_TIDB', # <-- OJO: ponla entre las comillas, sin espacios al inicio o final
+            'PASSWORD': 'A1WPIYSQIVy4OEZu', # <-- OJO: ponla entre las comillas, sin espacios al inicio o final
             'HOST': 'gateway01.us-east-1.prod.aws.tidbcloud.com',
             'PORT': '4000',
             'OPTIONS': {
@@ -98,7 +98,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'AQUI_PON_TU_BASE_LOCAL', # La base que usas en XAMPP
+            'NAME': 'pos_db', # La base que usas en XAMPP
             'USER': 'root',
             'PASSWORD': '',
             'HOST': '127.0.0.1',
