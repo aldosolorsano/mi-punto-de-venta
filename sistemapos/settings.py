@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -75,19 +75,34 @@ WSGI_APPLICATION = 'sistemapos.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test',
-        'USER': '3KpkYMYZrYCpt4i.root',
-        'PASSWORD': 'tktbLXSTeITlX2HD',
-        'HOST': 'gateway01.us-east-1.prod.aws.tidbcloud.com',
-        'PORT': '4000',
-        'OPTIONS': {
-            'ssl': {'ssl_mode': 'VERIFY_IDENTITY'}
+# Verificamos si la variable ENTORNO dice 'PRODUCCION' (esto solo pasará en Vercel)
+if os.environ.get('ENTORNO') == 'PRODUCCION':
+    # --- CONEXIÓN A LA NUBE (TiDB para Vercel) ---
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'test',
+            'USER': '3KpkYMYZrYCpt4i.root',
+            'PASSWORD': 'AQUI_PON_TU_CONTRASEÑA_REAL_DE_TIDB',
+            'HOST': 'gateway01.us-east-1.prod.aws.tidbcloud.com',
+            'PORT': '4000',
+            'OPTIONS': {
+                'ssl': {'ssl_mode': 'VERIFY_IDENTITY'}
+            }
         }
     }
-}
+else:
+    # --- CONEXIÓN LOCAL (XAMPP para tu computadora) ---
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'AQUI_NOMBRE_DE_TU_BASE_LOCAL', # La que usabas en XAMPP
+            'USER': 'root', # Usualmente es root en XAMPP
+            'PASSWORD': '', # Usualmente está vacía en XAMPP
+            'HOST': '127.0.0.1',
+            'PORT': '3306',
+        }
+    }
 
 
 # Password validation
