@@ -56,7 +56,7 @@
                 <div class="card-body">
                     <div class="mb-4">
                         <label class="form-label fw-bold">Buscar por Código de Barras o Nombre:</label>
-                        <input type="text" id="input-buscador" class="form-control form-control-lg" placeholder="Escanea el código o escribe aquí y presiona Enter..." autofocus>
+                        {% csrf_token %} <input type="text" id="input-buscador" class="form-control form-control-lg" placeholder="Escanea el código o escribe aquí y presiona Enter..." autofocus>
                     </div>
 
                     <h5>Productos Disponibles</h5>
